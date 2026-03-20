@@ -16,20 +16,16 @@ if (!app) {
 }
 
 app.innerHTML = `
-  <div class="loading-screen">
-    <div class="loading-card">Cargando juego...</div>
-  </div>
-`;
-
-app.innerHTML = `
   <main class="app-shell" style="background-image: url('${GAME_CONFIG.brand.background}')">
     <header class="topbar">
       <img class="brand-logo" src="${GAME_CONFIG.brand.logo}" alt="${GAME_CONFIG.brand.title}" />
       <div class="hud">
+      <!--
         <div class="hud-card">
           <span class="hud-label">${GAME_CONFIG.texts.time}</span>
           <span class="hud-value" id="timeValue">00:45</span>
         </div>
+      -->
         <div class="hud-card">
           <span class="hud-label">${GAME_CONFIG.texts.attempts}</span>
           <span class="hud-value" id="attemptsValue">0 / ${GAME_CONFIG.rules.maxAttempts}</span>

@@ -73,6 +73,7 @@
 
 .modal-action-button:active {
   transform: scale(0.97);
+  filter: brightness(0.80);
 }
 
 @keyframes modalEnter {

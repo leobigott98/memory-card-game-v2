@@ -8,10 +8,10 @@ export const GAME_CONFIG = {
   board: {
     rows: 4,
     cols: 3,
-    pairs: 6,
+    pairs: 3,
   },
   rules: {
-    maxAttempts: 12,
+    maxAttempts: 5,
     timeLimitSeconds: 60,
     flipBackDelayMs: 700,
     winDelayMs: 500,
@@ -24,6 +24,7 @@ export const GAME_CONFIG = {
     winMessage: 'Has ganado',
     loseTitle: '😢 ¡Lo sentimos!',
     loseMessage: 'Has agotado el número de intentos.',
+    loseMessageTime: 'Has agotado el tiempo disponible.',
     playAgain: 'Jugar de nuevo',
     tryAgain: 'Intentar de nuevo',
   },

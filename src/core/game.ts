@@ -22,8 +22,8 @@ type GameState = {
   matches: number;
   lockBoard: boolean;
   gameOver: boolean;
-  remainingSeconds: number;
-  timerId: number | null;
+  //remainingSeconds: number;
+  //timerId: number | null;
 };
 
 export function createGame(elements: GameElements): void {
@@ -35,29 +35,31 @@ export function createGame(elements: GameElements): void {
     matches: 0,
     lockBoard: false,
     gameOver: false,
-    remainingSeconds: GAME_CONFIG.rules.timeLimitSeconds,
-    timerId: null,
+    //remainingSeconds: GAME_CONFIG.rules.timeLimitSeconds,
+    //timerId: null,
   };
 
-  function formatTime(totalSeconds: number): string {
+  /* function formatTime(totalSeconds: number): string {
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
     return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-  }
+  } */
 
   function updateHud(): void {
-    elements.timeElement.textContent = formatTime(state.remainingSeconds);
+    //elements.timeElement.textContent = formatTime(state.remainingSeconds);
     elements.attemptsElement.textContent = `${state.attempts} / ${GAME_CONFIG.rules.maxAttempts}`;
   }
 
-  function stopTimer(): void {
+  /* function stopTimer(): void {
     if (state.timerId !== null) {
       window.clearInterval(state.timerId);
       state.timerId = null;
     }
-  }
+  } */
 
-  function startTimer(): void {
+  // STARTS THE COUNTDOWN TIMER
+  // Commented out for this version, but can be re-enabled if time limit is desired
+/*   function startTimer(): void {
     stopTimer();
     state.timerId = window.setInterval(() => {
       if (state.gameOver) return;
@@ -65,11 +67,12 @@ export function createGame(elements: GameElements): void {
       state.remainingSeconds -= 1;
       updateHud();
 
+      // LOSE IF TIME RUNS OUT
       if (state.remainingSeconds <= 0) {
-        loseGame(GAME_CONFIG.texts.loseMessage);
+        loseGame(GAME_CONFIG.texts.loseMessageTime);
       }
     }, 1000);
-  }
+  } */
 
   function openModal(title: string, text: string, actionText: string): void {
     elements.modalTitle.textContent = title;
@@ -102,10 +105,9 @@ export function createGame(elements: GameElements): void {
 
       cardElement.innerHTML = `
   <div class="memory-card__inner">
-    <div
-      class="memory-card__face memory-card__face--front"
-      style="background-image: url('${card.image}')"
-    ></div>
+    <div class="memory-card__face memory-card__face--front">
+        <img src="${card.image}" alt="${card.name}" class="memory-card__image" />
+    </div>
     <div
       class="memory-card__face memory-card__face--back"
       style="background-image: url('${GAME_CONFIG.brand.cardBack}')"
@@ -156,7 +158,7 @@ export function createGame(elements: GameElements): void {
   function checkWin(): void {
     if (state.matches === GAME_CONFIG.board.pairs) {
       state.gameOver = true;
-      stopTimer();
+      //stopTimer();
       window.setTimeout(() => {
         openModal(
           GAME_CONFIG.texts.winTitle,
@@ -171,7 +173,7 @@ export function createGame(elements: GameElements): void {
     if (state.gameOver) return;
     state.gameOver = true;
     state.lockBoard = true;
-    stopTimer();
+    //stopTimer();
 
     openModal(GAME_CONFIG.texts.loseTitle, message, GAME_CONFIG.texts.tryAgain);
   }
@@ -245,7 +247,7 @@ export function createGame(elements: GameElements): void {
   }
 
   function restartGame(): void {
-    stopTimer();
+    //stopTimer();
 
     state.deck = createDeck();
     state.firstCardIndex = null;
@@ -254,12 +256,12 @@ export function createGame(elements: GameElements): void {
     state.matches = 0;
     state.lockBoard = false;
     state.gameOver = false;
-    state.remainingSeconds = GAME_CONFIG.rules.timeLimitSeconds;
+    //state.remainingSeconds = GAME_CONFIG.rules.timeLimitSeconds;
 
     closeModal();
     updateHud();
     renderBoard();
-    startTimer();
+    //startTimer();
   }
 
   elements.restartButton.addEventListener("click", restartGame);
