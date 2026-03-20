@@ -1,6 +1,6 @@
-import { GAME_CONFIG } from '../config/game-config';
-import { createDeck } from './deck';
-import type { CardItem } from './deck';
+import { GAME_CONFIG } from "../config/game-config";
+import { createDeck } from "./deck";
+import type { CardItem } from "./deck";
 
 type GameElements = {
   boardElement: HTMLDivElement;
@@ -42,7 +42,7 @@ export function createGame(elements: GameElements): void {
   function formatTime(totalSeconds: number): string {
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
-    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
   }
 
   function updateHud(): void {
@@ -75,13 +75,13 @@ export function createGame(elements: GameElements): void {
     elements.modalTitle.textContent = title;
     elements.modalText.textContent = text;
     elements.modalActionButton.textContent = actionText;
-    elements.modalElement.classList.remove('hidden');
-    elements.modalElement.setAttribute('aria-hidden', 'false');
+    elements.modalElement.classList.remove("hidden");
+    elements.modalElement.setAttribute("aria-hidden", "false");
   }
 
   function closeModal(): void {
-    elements.modalElement.classList.add('hidden');
-    elements.modalElement.setAttribute('aria-hidden', 'true');
+    elements.modalElement.classList.add("hidden");
+    elements.modalElement.setAttribute("aria-hidden", "true");
   }
 
   function resetSelections(): void {
@@ -91,38 +91,66 @@ export function createGame(elements: GameElements): void {
   }
 
   function renderBoard(): void {
-    elements.boardElement.innerHTML = '';
+    elements.boardElement.innerHTML = "";
 
     state.deck.forEach((card, index) => {
-      const cardElement = document.createElement('button');
-      cardElement.className = 'memory-card';
-      cardElement.type = 'button';
+      const cardElement = document.createElement("button");
+      cardElement.className = "memory-card";
+      cardElement.type = "button";
       cardElement.dataset.index = String(index);
-      cardElement.setAttribute('aria-label', `Carta ${index + 1}`);
-
-      const isFlipped =
-        state.firstCardIndex === index ||
-        state.secondCardIndex === index ||
-        card.matched;
-
-      if (isFlipped) cardElement.classList.add('is-flipped');
-      if (card.matched) cardElement.classList.add('is-matched');
+      cardElement.setAttribute("aria-label", `Carta ${index + 1}`);
 
       cardElement.innerHTML = `
-        <span class="memory-card__inner">
-          <span class="memory-card__face memory-card__face--front">
-            <img src="${card.image}" alt="${card.name}" class="memory-card__image" />
-          </span>
-          <span
-            class="memory-card__face memory-card__face--back"
-            style="background-image: url('${GAME_CONFIG.brand.cardBack}')"
-          ></span>
-        </span>
-      `;
+  <div class="memory-card__inner">
+    <div
+      class="memory-card__face memory-card__face--front"
+      style="background-image: url('${card.image}')"
+    ></div>
+    <div
+      class="memory-card__face memory-card__face--back"
+      style="background-image: url('${GAME_CONFIG.brand.cardBack}')"
+    ></div>
+  </div>
+`;
 
-      cardElement.addEventListener('click', () => handleCardClick(index));
+      if (card.matched) {
+        cardElement.classList.add("is-flipped", "is-matched");
+        cardElement.disabled = true;
+      }
+
+      cardElement.addEventListener("click", () => handleCardClick(index));
       elements.boardElement.appendChild(cardElement);
     });
+  }
+
+  function getCardElement(index: number): HTMLButtonElement | null {
+    return elements.boardElement.querySelector(
+      `.memory-card[data-index="${index}"]`,
+    ) as HTMLButtonElement | null;
+  }
+
+  function flipCard(index: number): void {
+    const cardElement = getCardElement(index);
+    if (!cardElement) return;
+
+    cardElement.offsetHeight;
+    cardElement.classList.add("is-flipped");
+  }
+
+  function unflipCard(index: number): void {
+    const cardElement = getCardElement(index);
+    if (!cardElement) return;
+
+    cardElement.classList.remove("is-flipped");
+  }
+
+  function markMatched(index: number): void {
+    const cardElement = getCardElement(index);
+    if (!cardElement) return;
+
+    cardElement.classList.add("is-flipped", "is-matched");
+    cardElement.disabled = true;
+    cardElement.style.pointerEvents = "none";
   }
 
   function checkWin(): void {
@@ -145,40 +173,44 @@ export function createGame(elements: GameElements): void {
     state.lockBoard = true;
     stopTimer();
 
-    openModal(
-      GAME_CONFIG.texts.loseTitle,
-      message,
-      GAME_CONFIG.texts.tryAgain,
-    );
+    openModal(GAME_CONFIG.texts.loseTitle, message, GAME_CONFIG.texts.tryAgain);
   }
 
   function handleMatch(firstIndex: number, secondIndex: number): void {
     state.deck[firstIndex].matched = true;
     state.deck[secondIndex].matched = true;
     state.matches += 1;
+
+    markMatched(firstIndex);
+    markMatched(secondIndex);
+
     resetSelections();
-    renderBoard();
     checkWin();
   }
 
   function handleMismatch(firstIndex: number, secondIndex: number): void {
     window.setTimeout(() => {
       if (state.gameOver) return;
+
+      unflipCard(firstIndex);
+      unflipCard(secondIndex);
+
       state.firstCardIndex = null;
       state.secondCardIndex = null;
       state.lockBoard = false;
-      renderBoard();
     }, GAME_CONFIG.rules.flipBackDelayMs);
   }
 
   function handleCardClick(index: number): void {
+    if (state.deck[index].matched) return;
     if (state.gameOver || state.lockBoard) return;
     if (state.firstCardIndex === index) return;
     if (state.deck[index].matched) return;
 
+    flipCard(index);
+
     if (state.firstCardIndex === null) {
       state.firstCardIndex = index;
-      renderBoard();
       return;
     }
 
@@ -186,17 +218,19 @@ export function createGame(elements: GameElements): void {
     state.lockBoard = true;
     state.attempts += 1;
     updateHud();
-    renderBoard();
 
     const firstIndex = state.firstCardIndex;
     const secondIndex = state.secondCardIndex;
 
     if (firstIndex === null || secondIndex === null) return;
 
-    const isMatch = state.deck[firstIndex].name === state.deck[secondIndex].name;
+    const isMatch =
+      state.deck[firstIndex].name === state.deck[secondIndex].name;
 
     if (isMatch) {
-      handleMatch(firstIndex, secondIndex);
+      window.setTimeout(() => {
+        handleMatch(firstIndex, secondIndex);
+      }, 450);
       return;
     }
 
@@ -228,9 +262,9 @@ export function createGame(elements: GameElements): void {
     startTimer();
   }
 
-  elements.restartButton.addEventListener('click', restartGame);
-  elements.modalActionButton.addEventListener('click', restartGame);
-  elements.closeModalButton.addEventListener('click', restartGame);
+  elements.restartButton.addEventListener("click", restartGame);
+  elements.modalActionButton.addEventListener("click", restartGame);
+  elements.closeModalButton.addEventListener("click", restartGame);
 
   restartGame();
 }

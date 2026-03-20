@@ -4,8 +4,14 @@ export async function preloadImages(paths: string[]): Promise<void> {
       (path) =>
         new Promise<void>((resolve, reject) => {
           const img = new Image();
-          img.onload = () => resolve();
-          img.onerror = () => reject(new Error(`Failed to load image: ${path}`));
+          img.onload = async () => {
+            try {
+              await img.decode();
+            } catch {}
+            resolve();
+          };
+          img.onerror = () =>
+            reject(new Error(`Failed to load image: ${path}`));
           img.src = path;
         }),
     ),

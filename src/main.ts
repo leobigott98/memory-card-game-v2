@@ -16,6 +16,12 @@ if (!app) {
 }
 
 app.innerHTML = `
+  <div class="loading-screen">
+    <div class="loading-card">Cargando juego...</div>
+  </div>
+`;
+
+app.innerHTML = `
   <main class="app-shell" style="background-image: url('${GAME_CONFIG.brand.background}')">
     <header class="topbar">
       <img class="brand-logo" src="${GAME_CONFIG.brand.logo}" alt="${GAME_CONFIG.brand.title}" />
@@ -53,12 +59,16 @@ app.innerHTML = `
   </main>
 `;
 
-await preloadImages([
-  GAME_CONFIG.brand.logo,
-  GAME_CONFIG.brand.background,
-  GAME_CONFIG.brand.cardBack,
-  ...GAME_CONFIG.cards.map(card => card.image),
-]);
+try {
+  await preloadImages([
+    GAME_CONFIG.brand.logo,
+    GAME_CONFIG.brand.background,
+    GAME_CONFIG.brand.cardBack,
+    ...GAME_CONFIG.cards.map(card => card.image),
+  ]);
+} catch (error) {
+  console.error('Image preload failed:', error);
+}
 
 createGame({
   boardElement: document.getElementById('board') as HTMLDivElement,

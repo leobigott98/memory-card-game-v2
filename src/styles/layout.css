@@ -104,3 +104,12 @@
   transform: scale(0.97);
   filter: brightness(0.95);
 }
+
+.memory-card,
+.primary-button,
+.modal-close,
+.modal-action-button {
+  appearance: none;
+  -webkit-appearance: none;
+  font: inherit;
+}

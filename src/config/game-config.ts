@@ -13,7 +13,7 @@ export const GAME_CONFIG = {
   rules: {
     maxAttempts: 12,
     timeLimitSeconds: 60,
-    flipBackDelayMs: 850,
+    flipBackDelayMs: 700,
     winDelayMs: 500,
   },
   texts: {
