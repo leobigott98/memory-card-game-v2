@@ -1,60 +1,73 @@
-import './style.css'
-import typescriptLogo from './assets/typescript.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import { setupCounter } from './counter.ts'
+import './styles/base.css';
+import './styles/layout.css';
+import './styles/board.css';
+import './styles/card.css';
+import './styles/modal.css';
+import './styles/kiosk.css';
 
-document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-<section id="center">
-  <div class="hero">
-    <img src="${heroImg}" class="base" width="170" height="179">
-    <img src="${typescriptLogo}" class="framework" alt="TypeScript logo"/>
-    <img src=${viteLogo} class="vite" alt="Vite logo" />
-  </div>
-  <div>
-    <h1>Get started</h1>
-    <p>Edit <code>src/main.ts</code> and save to test <code>HMR</code></p>
-  </div>
-  <button id="counter" type="button" class="counter"></button>
-</section>
+import { GAME_CONFIG } from './config/game-config';
+import { createGame } from './core/game';
+import { preloadImages } from './core/preload';
 
-<div class="ticks"></div>
+const app = document.querySelector<HTMLDivElement>('#app');
 
-<section id="next-steps">
-  <div id="docs">
-    <svg class="icon" role="presentation" aria-hidden="true"><use href="/icons.svg#documentation-icon"></use></svg>
-    <h2>Documentation</h2>
-    <p>Your questions, answered</p>
-    <ul>
-      <li>
-        <a href="https://vite.dev/" target="_blank">
-          <img class="logo" src=${viteLogo} alt="" />
-          Explore Vite
-        </a>
-      </li>
-      <li>
-        <a href="https://www.typescriptlang.org" target="_blank">
-          <img class="button-icon" src="${typescriptLogo}" alt="">
-          Learn more
-        </a>
-      </li>
-    </ul>
-  </div>
-  <div id="social">
-    <svg class="icon" role="presentation" aria-hidden="true"><use href="/icons.svg#social-icon"></use></svg>
-    <h2>Connect with us</h2>
-    <p>Join the Vite community</p>
-    <ul>
-      <li><a href="https://github.com/vitejs/vite" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#github-icon"></use></svg>GitHub</a></li>
-      <li><a href="https://chat.vite.dev/" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#discord-icon"></use></svg>Discord</a></li>
-      <li><a href="https://x.com/vite_js" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#x-icon"></use></svg>X.com</a></li>
-      <li><a href="https://bsky.app/profile/vite.dev" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#bluesky-icon"></use></svg>Bluesky</a></li>
-    </ul>
-  </div>
-</section>
+if (!app) {
+  throw new Error('App root not found');
+}
 
-<div class="ticks"></div>
-<section id="spacer"></section>
-`
+app.innerHTML = `
+  <main class="app-shell" style="background-image: url('${GAME_CONFIG.brand.background}')">
+    <header class="topbar">
+      <img class="brand-logo" src="${GAME_CONFIG.brand.logo}" alt="${GAME_CONFIG.brand.title}" />
+      <div class="hud">
+        <div class="hud-card">
+          <span class="hud-label">${GAME_CONFIG.texts.time}</span>
+          <span class="hud-value" id="timeValue">00:45</span>
+        </div>
+        <div class="hud-card">
+          <span class="hud-label">${GAME_CONFIG.texts.attempts}</span>
+          <span class="hud-value" id="attemptsValue">0 / ${GAME_CONFIG.rules.maxAttempts}</span>
+        </div>
+      </div>
+    </header>
 
-setupCounter(document.querySelector<HTMLButtonElement>('#counter')!)
+    <section class="board-section">
+      <div id="board" class="board"></div>
+    </section>
+
+    <footer class="footer-bar">
+      <button id="restartButton" class="primary-button">
+        ${GAME_CONFIG.texts.restart}
+      </button>
+    </footer>
+
+    <div id="gameModal" class="modal hidden" aria-hidden="true">
+      <div class="modal-overlay"></div>
+      <div class="modal-card">
+        <button id="closeModalButton" class="modal-close" aria-label="Cerrar">×</button>
+        <h2 id="modalTitle"></h2>
+        <p id="modalText"></p>
+        <button id="modalActionButton" class="modal-action-button"></button>
+      </div>
+    </div>
+  </main>
+`;
+
+await preloadImages([
+  GAME_CONFIG.brand.logo,
+  GAME_CONFIG.brand.background,
+  GAME_CONFIG.brand.cardBack,
+  ...GAME_CONFIG.cards.map(card => card.image),
+]);
+
+createGame({
+  boardElement: document.getElementById('board') as HTMLDivElement,
+  timeElement: document.getElementById('timeValue') as HTMLSpanElement,
+  attemptsElement: document.getElementById('attemptsValue') as HTMLSpanElement,
+  restartButton: document.getElementById('restartButton') as HTMLButtonElement,
+  modalElement: document.getElementById('gameModal') as HTMLDivElement,
+  modalTitle: document.getElementById('modalTitle') as HTMLHeadingElement,
+  modalText: document.getElementById('modalText') as HTMLParagraphElement,
+  modalActionButton: document.getElementById('modalActionButton') as HTMLButtonElement,
+  closeModalButton: document.getElementById('closeModalButton') as HTMLButtonElement,
+});
