@@ -6,10 +6,18 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "android": "npx cap open android",
+    "sync": "npm run build && npx cap sync android"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.2.0",
     "typescript": "~5.9.3",
     "vite": "^8.0.1"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.2.0",
+    "@capacitor/core": "^8.2.0",
+    "tslib": "^2.8.1"
   }
 }
